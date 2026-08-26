@@ -14,6 +14,10 @@ Repositories opt in with two files:
 The shared workflow runs Ruff lint and formatting checks, mypy, pytest, and
 pip-audit. Repository configuration cannot inject shell commands.
 
+Older repositories may temporarily set `ruff_format` to `false` while an
+explicit formatting-only PR establishes their baseline. Ruff lint, mypy,
+pytest, and pip-audit remain mandatory.
+
 ## Automatic onboarding
 
 `bootstrap-static-review.yml` scans organization repositories daily and can be

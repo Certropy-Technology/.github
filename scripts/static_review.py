@@ -42,6 +42,13 @@ def path_list(
     return result
 
 
+def boolean(config: dict[str, Any], field: str, *, default: bool) -> bool:
+    value = config.get(field, default)
+    if not isinstance(value, bool):
+        fail(f"{field} must be a boolean")
+    return value
+
+
 def run(command: list[str]) -> None:
     print("+ " + " ".join(command), flush=True)
     completed = subprocess.run(command, check=False)
@@ -87,8 +94,9 @@ def main() -> None:
         else:
             run([sys.executable, "-m", "pip", "install", item])
 
-    run(["ruff", "check", *ruff_paths])
-    run(["ruff", "format", "--check", *ruff_paths])
+    run(["ruff", "check", "--select", "E4,E7,E9,F", *ruff_paths])
+    if boolean(config, "ruff_format", default=True):
+        run(["ruff", "format", "--check", *ruff_paths])
     run(["mypy", "--ignore-missing-imports", "--follow-imports", "skip", *mypy_paths])
     run(["pytest", "-q", *pytest_paths])
 

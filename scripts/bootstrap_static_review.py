@@ -173,6 +173,7 @@ def infer_config(paths: set[str]) -> dict[str, Any] | None:
         "project_root": project_root,
         "install_profile": install_profile,
         "ruff_paths": ruff_paths,
+        "ruff_format": True,
         "mypy_paths": mypy_paths,
         "pytest_paths": pytest_paths,
         "audit_requirements": requirements,
