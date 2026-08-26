@@ -298,7 +298,10 @@ def main() -> None:
         ):
             continue
         paths = tree(api, args.organization, repository)
-        if ".github/workflows/static-review.yml" in paths:
+        if {
+            ".github/workflows/static-review.yml",
+            ".github/static-review.json",
+        }.issubset(paths):
             print(f"skip {repository.name}: already configured")
             continue
         config = infer_config(paths)

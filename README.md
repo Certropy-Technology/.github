@@ -22,7 +22,8 @@ pytest, and pip-audit remain mandatory.
 
 `bootstrap-static-review.yml` scans organization repositories daily and can be
 started manually. It opens a PR when it finds a Python repository without the
-caller workflow.
+shared caller and configuration pair. A repository with an older standalone
+`static-review.yml` is migrated to the shared workflow through the same PR.
 
 Configure an Actions secret named `ORG_BOOTSTRAP_TOKEN` in this repository.
 Use a fine-grained token limited to the target organization with:
