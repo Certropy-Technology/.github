@@ -168,7 +168,7 @@ def infer_config(paths: set[str]) -> dict[str, Any] | None:
         for path in paths
         if path.rsplit("/", 1)[-1].startswith("requirements") and path.endswith(".txt")
     )
-    return {
+    config = {
         "schema_version": 1,
         "project_root": project_root,
         "install_profile": install_profile,
@@ -178,6 +178,11 @@ def infer_config(paths: set[str]) -> dict[str, Any] | None:
         "pytest_paths": pytest_paths,
         "audit_requirements": requirements,
     }
+    if "harbor-secure-runner/pyproject.toml" in paths:
+        config["ruff_config"] = "harbor-secure-runner/pyproject.toml"
+    elif "pyproject.toml" in paths:
+        config["ruff_config"] = "pyproject.toml"
+    return config
 
 
 def content(

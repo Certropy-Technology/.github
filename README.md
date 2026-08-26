@@ -9,7 +9,8 @@ Repositories opt in with two files:
 
 - `.github/workflows/static-review.yml` calls the shared workflow;
 - `.github/static-review.json` declares project-relative paths and one fixed
-  installation profile.
+  installation profile. It may also select a repository Ruff configuration by
+  relative path; arbitrary shell commands are never accepted.
 
 The shared workflow runs Ruff lint and formatting checks, mypy, pytest, and
 pip-audit. Repository configuration cannot inject shell commands.

@@ -50,6 +50,13 @@ def boolean(config: dict[str, Any], field: str, *, default: bool) -> bool:
     return value
 
 
+def optional_path(config: dict[str, Any], field: str) -> str | None:
+    value = config.get(field)
+    if value is None:
+        return None
+    return relative_path(value, field=field)
+
+
 def run(command: list[str], *, env: dict[str, str] | None = None) -> None:
     print("+ " + " ".join(command), flush=True)
     completed = subprocess.run(command, check=False, env=env)
@@ -80,11 +87,21 @@ def main() -> None:
         fail(f"install_profile must be one of {', '.join(sorted(INSTALL_PROFILES))}")
 
     ruff_paths = path_list(config, "ruff_paths")
+    ruff_config = optional_path(config, "ruff_config")
     mypy_paths = path_list(config, "mypy_paths")
     pytest_paths = path_list(config, "pytest_paths")
     audit_files = path_list(config, "audit_requirements", required=False)
 
-    for path in [project_root, *ruff_paths, *mypy_paths, *pytest_paths, *audit_files]:
+    configured_paths = [
+        project_root,
+        *ruff_paths,
+        *mypy_paths,
+        *pytest_paths,
+        *audit_files,
+    ]
+    if ruff_config:
+        configured_paths.append(ruff_config)
+    for path in configured_paths:
         if path != "." and not Path(path).exists():
             fail(f"configured path does not exist: {path}")
 
@@ -95,9 +112,19 @@ def main() -> None:
         else:
             run([sys.executable, "-m", "pip", "install", item])
 
-    run(["ruff", "check", "--select", "E4,E7,E9,F", *ruff_paths])
+    ruff_config_args = ["--config", ruff_config] if ruff_config else []
+    run(
+        [
+            "ruff",
+            "check",
+            *ruff_config_args,
+            "--select",
+            "E4,E7,E9,F",
+            *ruff_paths,
+        ]
+    )
     if boolean(config, "ruff_format", default=True):
-        run(["ruff", "format", "--check", *ruff_paths])
+        run(["ruff", "format", *ruff_config_args, "--check", *ruff_paths])
     run(["mypy", "--ignore-missing-imports", "--follow-imports", "skip", *mypy_paths])
     pytest_env = os.environ.copy()
     python_path = pytest_env.get("PYTHONPATH")
