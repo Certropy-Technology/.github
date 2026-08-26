@@ -22,7 +22,7 @@ jobs:
       REPOSITORIES: ${{ inputs.repositories }}
     steps:
       - name: Check out automation
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Report missing bootstrap credential
         if: env.BOOTSTRAP_TOKEN == ''
