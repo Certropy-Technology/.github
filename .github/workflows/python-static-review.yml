@@ -1,0 +1,51 @@
+name: Shared Python static review
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        description: Repository-relative static review configuration
+        required: false
+        type: string
+        default: .github/static-review.json
+      python-version:
+        description: Python version used by the review runner
+        required: false
+        type: string
+        default: "3.12"
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    name: Ruff, mypy, pytest, pip-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check out shared review tools
+        uses: actions/checkout@v4
+        with:
+          repository: Certropy-Technology/.github
+          ref: main
+          path: .certropy-workflows
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+          cache-dependency-path: .certropy-workflows/requirements-review.txt
+
+      - name: Install review tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r .certropy-workflows/requirements-review.txt
+
+      - name: Run static review
+        run: >-
+          python .certropy-workflows/scripts/static_review.py
+          --config "${{ inputs.config-path }}"

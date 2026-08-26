@@ -1,2 +1,31 @@
-# .github
-Organization-wide workflow templates and repository automation
+# Certropy Technology GitHub automation
+
+This repository owns the reusable static-review workflow used by organization
+repositories and the bootstrap automation that opens onboarding pull requests.
+
+## Shared Python review
+
+Repositories opt in with two files:
+
+- `.github/workflows/static-review.yml` calls the shared workflow;
+- `.github/static-review.json` declares project-relative paths and one fixed
+  installation profile.
+
+The shared workflow runs Ruff lint and formatting checks, mypy, pytest, and
+pip-audit. Repository configuration cannot inject shell commands.
+
+## Automatic onboarding
+
+`bootstrap-static-review.yml` scans organization repositories daily and can be
+started manually. It opens a PR when it finds a Python repository without the
+caller workflow.
+
+Configure an Actions secret named `ORG_BOOTSTRAP_TOKEN` in this repository.
+Use a fine-grained token limited to the target organization with:
+
+- Contents: read and write;
+- Pull requests: read and write;
+- Workflows: read and write, when required by the selected token type.
+
+The workflow safely does nothing when the secret is absent. Organization-wide
+branch protection is a separate GitHub Team/Enterprise setting.

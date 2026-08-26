@@ -1,0 +1,38 @@
+name: Bootstrap organization static review
+
+on:
+  workflow_dispatch:
+    inputs:
+      repositories:
+        description: Optional comma-separated repository names; empty scans all repositories
+        required: false
+        type: string
+  schedule:
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BOOTSTRAP_TOKEN: ${{ secrets.ORG_BOOTSTRAP_TOKEN }}
+      REPOSITORIES: ${{ inputs.repositories }}
+    steps:
+      - name: Check out automation
+        uses: actions/checkout@v4
+
+      - name: Report missing bootstrap credential
+        if: env.BOOTSTRAP_TOKEN == ''
+        run: echo "ORG_BOOTSTRAP_TOKEN is not configured; no repositories were changed."
+
+      - name: Detect repositories and open onboarding PRs
+        if: env.BOOTSTRAP_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ env.BOOTSTRAP_TOKEN }}
+        run: >-
+          python scripts/bootstrap_static_review.py
+          --organization Certropy-Technology
+          --repositories "${REPOSITORIES}"
