@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -49,9 +50,9 @@ def boolean(config: dict[str, Any], field: str, *, default: bool) -> bool:
     return value
 
 
-def run(command: list[str]) -> None:
+def run(command: list[str], *, env: dict[str, str] | None = None) -> None:
     print("+ " + " ".join(command), flush=True)
-    completed = subprocess.run(command, check=False)
+    completed = subprocess.run(command, check=False, env=env)
     if completed.returncode:
         raise SystemExit(completed.returncode)
 
@@ -98,7 +99,12 @@ def main() -> None:
     if boolean(config, "ruff_format", default=True):
         run(["ruff", "format", "--check", *ruff_paths])
     run(["mypy", "--ignore-missing-imports", "--follow-imports", "skip", *mypy_paths])
-    run(["pytest", "-q", *pytest_paths])
+    pytest_env = os.environ.copy()
+    python_path = pytest_env.get("PYTHONPATH")
+    pytest_env["PYTHONPATH"] = os.pathsep.join(
+        part for part in [str(Path.cwd()), python_path] if part
+    )
+    run(["pytest", "-q", *pytest_paths], env=pytest_env)
 
     if audit_files:
         for requirements in audit_files:
