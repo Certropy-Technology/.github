@@ -3,6 +3,9 @@
 This repository owns the reusable static-review workflow used by organization
 repositories and the bootstrap automation that opens onboarding pull requests.
 
+Chinese onboarding guide for repository maintainers:
+[`docs/REPOSITORY_ONBOARDING_CN.md`](docs/REPOSITORY_ONBOARDING_CN.md).
+
 ## Shared Python review
 
 Repositories opt in with two files:
